@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPHEREx ChronoScope</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top glass">
+  <div class="brand"><span class="logo">◉</span><div><b>SPHEREx ChronoScope</b><small>Multi-epoch sky blink &amp; 0.75–5.0 µm spectra</small></div></div>
+  <form id="searchForm" class="search">
+    <input id="q" placeholder="RA, Dec  (08h55m10.8s, -07d14m42s · 133.795, -7.245) or name" autocomplete="off">
+    <button class="btn primary">Go</button>
+  </form>
+  <div class="pills" id="pills"></div>
+  <button class="btn" id="uploadBtn">+ Upload Images</button>
+  <button class="btn" id="shareBtn">Share URL</button>
+  <span id="modeBadge" class="badge">…</span>
+</header>
+
+<main>
+  <aside class="side glass">
+    <section><h4>Field of view</h4><div class="seg" id="fovSeg"></div><div class="hint" id="xfer"></div></section>
+    <section><h4>SPHEREx detector array</h4>
+      <select id="band">
+        <option value="D1-D6">All arrays (D1–D6 coadd)</option>
+        <option value="D1">D1 · 0.75–1.11 µm</option><option value="D2">D2 · 1.11–1.64 µm</option>
+        <option value="D3">D3 · 1.64–2.42 µm</option><option value="D4">D4 · 2.42–3.82 µm</option>
+        <option value="D5">D5 · 3.82–4.42 µm</option><option value="D6">D6 · 4.42–5.00 µm</option>
+      </select></section>
+    <section><h4>Image math</h4>
+      <div class="seg vert" id="modeSeg">
+        <button data-m="blink">Blink</button><button data-m="subtract">Subtract (B − A)</button>
+        <button data-m="coadd">Coadd (mean)</button><button data-m="median">Coadd (median)</button>
+        <button data-m="rgb">RGB motion trail</button></div>
+      <label class="row">Reference epoch A <select id="refEp"></select></label>
+    </section>
+    <section><h4>Stretch</h4>
+      <select id="stretch"><option>asinh</option><option>linear</option><option>log</option><option>sqrt</option></select>
+      <label class="row">Black <input type="range" id="blk" min="0" max="50" value="1"><output id="blkO"></output></label>
+      <label class="row">White <input type="range" id="wht" min="50" max="100" value="99"><output id="whtO"></output></label>
+      <select id="cmap"><option>grayscale</option><option>viridis</option><option>inferno</option><option>ir-heat</option></select>
+    </section>
+    <section><h4>Catalog overlays</h4>
+      <label><input type="checkbox" id="ovGaia"> Gaia DR3 (+ proper motion)</label>
+      <label><input type="checkbox" id="ovWise"> WISE / unWISE</label>
+      <label><input type="checkbox" id="ovNeo"> NEOSSat NEOs / debris</label>
+      <label><input type="checkbox" id="ovGrid" checked> WCS grid</label>
+    </section>
+    <section><h4>Tools</h4>
+      <button class="btn wide" id="pmTool">Proper-motion tool</button>
+      <div class="hint" id="pmOut">Click the source in epoch A, step to another epoch, click again.</div>
+    </section>
+  </aside>
+
+  <section class="center">
+    <div class="viewwrap glass">
+      <canvas id="sky"></canvas>
+      <div class="hud" id="hud">RA — Dec —</div>
+      <div class="epochTag" id="epochTag"></div>
+      <div class="player glass">
+        <button class="btn" id="prev">‹</button><button class="btn primary" id="play">▶</button><button class="btn" id="next">›</button>
+        <input type="range" id="scrub" min="0" max="0" value="0">
+        <label class="mini">Interval <input type="range" id="speed" min="100" max="2000" step="50" value="600"><output id="speedO"></output></label>
+        <button class="btn" id="pingpong" title="Loop / ping-pong">Loop</button>
+      </div>
+    </div>
+    <div class="panel glass">
+      <nav class="tabs" id="tabs">
+        <button data-t="spec" class="on">102-band spectrum</button><button data-t="lc">Light curve</button>
+        <button data-t="meta">FITS metadata &amp; flags</button><button data-t="cat">Catalog cross-match</button>
+      </nav>
+      <div id="tab-spec" class="tab"></div><div id="tab-lc" class="tab" hidden></div>
+      <div id="tab-meta" class="tab" hidden></div><div id="tab-cat" class="tab" hidden></div>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="dlg glass">
+    <div class="dlgHead"><b>Custom time-series studio</b><button class="btn" id="closeModal">✕</button></div>
+    <div id="drop" class="drop">Drop 2+ images here (.fits .fit .png .jpg .webp) or <label class="link">browse<input type="file" id="files" multiple hidden accept=".fits,.fit,.fts,.png,.jpg,.jpeg,.webp,.tif,.tiff"></label></div>
+    <div id="upList"></div>
+    <div class="dlgFoot"><span class="hint">Images are resampled to a common size. Use nudges to align offsets.</span><button class="btn primary" id="applyUp">Load into viewer</button></div>
+  </div>
+</div>
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
